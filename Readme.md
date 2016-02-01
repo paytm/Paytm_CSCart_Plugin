@@ -25,11 +25,10 @@ Ensure you have a running version of CScart installed. This module was developed
         REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_yes','Yes');
         REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_no','No');
  ```
- 2. There are two files called "paytm.php" and "paytm.tpl" and one checksum file included with this package.
- 3. Copy the files present in the folder "payments" and paste it to (root_dir)/app/payments/
- 4. Copy the file present in the folder "design" and paste it to (root_dir)/design/themes/responsive/templates/views/orders/components/payments/
+ 2. Copy the files present in the folder "app/payments" and paste it to (root_dir)/app/payments/
+ 3. Copy the file present in the folder "/design/backend/templates/views/payments/components/cc_processors" and paste it to (root_dir)/design/backend/templates/views/payments/components/cc_processors
 
-# CONFIGURATIONs FOR CSCart SETTINGS
+# CONFIGURATIONS FOR CSCart SETTINGS
  1. Login to the administrator area of cscart,
  2. Choose *Payment Methods* under the *Administration* tab, you will see *Paytm* under the Payment method if the module gets insatalled properly. Click on Edit and configure the following: 
     1. paytm Merchant ID: The Merchant Id provided by paytm.
