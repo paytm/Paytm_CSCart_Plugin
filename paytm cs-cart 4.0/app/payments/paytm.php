@@ -132,7 +132,6 @@ if (defined('PAYMENT_NOTIFICATION')) {
 	<input type=hidden name="CHANNEL_ID" value="{$channel_id}">
 	<input type=hidden name="TXN_AMOUNT" value="{$amount}">
 	<input type=hidden name="CUST_ID"  value="{$order_info['email']}">
-	<input type=hidden name="txnDate" type="hidden" value="{$date}" >
     <input type=hidden name="CALLBACK_URL" value="{$return_url}"> 
 	<input type=hidden name="CHECKSUMHASH" value="{$checksum}">
 	
