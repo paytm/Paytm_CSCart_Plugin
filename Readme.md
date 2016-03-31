@@ -1,5 +1,5 @@
 # INSTALLATION STEPS
-Ensure you have a running version of CScart installed. This module was developed under CSCart 3.0.2
+Ensure you have a running version of CScart installed. This module supports version 3.0.2 and upwards.
 
  1. Execute the following queries in the backend (database)
  
