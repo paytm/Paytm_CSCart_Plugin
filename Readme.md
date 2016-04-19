@@ -4,7 +4,7 @@ Ensure you have a running version of CScart installed. This module supports vers
  1. Execute the following queries in the backend (database)
  
  ```sh	
-  1. REPLACE INTO `cscart_payment_processors` (`processor_id`, `processor`, `processor_script`,	`processor_template`, `admin_template`, `callback`, `type`) VALUES (1000, 'Paytm', 'paytm.php',	'cc_outside.tpl', 'paytm.tpl', 'N', 'P');
+  1. REPLACE INTO `cscart_payment_processors` (`processor_id`, `processor`, `processor_script`,	`processor_template`, `admin_template`, `callback`, `type`) VALUES (1000, 'Paytm', 'paytm.php',	'views/orders/components/payments/cc_outside.tpl', 'paytm.tpl', 'N', 'P');
  ```
  ```sh
   2. insert into `cscart_payments` (`payment_id`, `company_id`, `usergroup_ids`, `position`, `status`, `template`, `processor_id`, `processor_params`, `a_surcharge`, `p_surcharge`, `tax_ids`, `localization`, `payment_category`) values('14','1','0','0','A','views/orders/components/payments/cc_outside.tpl','1000','a:7:{s:11:\"merchant_id\";s:0:\"\";s:10:\"secret_key\";s:0:\"\";s:13:\"industry_type\";s:0:\"\";s:12:\"website_name\";s:0:\"\";s:10:\"channel_id\";s:0:\"\";s:16:\"transaction_mode\";s:4:\"test\";s:10:\"log_params\";s:2:\"no\";}','0.000','0.000','','','tab3');
