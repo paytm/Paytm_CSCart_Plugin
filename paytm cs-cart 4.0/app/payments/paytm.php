@@ -2,8 +2,9 @@
 //
 // Paytm_v2.1 - CSCart
 //
-ini_set('display_errors','On');
-error_reporting(E_ALL);
+//ini_set('display_errors','On');
+//error_reporting(E_ALL);
+
 if ( !defined('AREA') ) { die('Access denied'); }
 use Tygh\Registry;
 
@@ -15,13 +16,14 @@ if (!defined('BOOTSTRAP')) { die('Access denied'); }
 if (defined('PAYMENT_NOTIFICATION')) {
 
 	
-	$order_id			= $_POST['ORDERID'];
+	$joint_order_id		= explode("-",$_POST['ORDERID']);
+	$order_id			= $joint_order_id[0];
 	$res_code			= $_POST['RESPCODE'];
 	$res_desc			= $_POST['RESPMSG'];
 	$checksum_recv		= $_POST['CHECKSUMHASH'];
 	$paramList			= $_POST;
 
-	if (fn_check_payment_script('paytm.php', $_POST['ORDERID'], $processor_data)){
+	if (fn_check_payment_script('paytm.php', $order_id, $processor_data)){
 	
 		if (empty($processor_data)) {
 				$processor_data = fn_get_processor_data($order_info['email']);
@@ -30,24 +32,27 @@ if (defined('PAYMENT_NOTIFICATION')) {
 
 	$bool = "FALSE";
 	$bool = verifychecksum_e($paramList, $secret_key, $checksum_recv);
-
-	if (!empty($_POST['ORDERID'])) {		
-		if (fn_check_payment_script('paytm.php', $_POST['ORDERID'], $processor_data)) {		
+	$paytmTxnIdText = "";
+	if(isset($_POST['TXNID']) && !empty($_POST['TXNID'])){
+		$paytmTxnIdText = " Paytm Transaction Id : ".$_POST['TXNID'];
+	}
+	if (!empty($order_id)) {		
+		if (fn_check_payment_script('paytm.php', $order_id, $processor_data)) {		
 			$pp_response = array();			
-			$order_info = fn_get_order_info($_POST['ORDERID']);			
+			$order_info = fn_get_order_info($order_id);			
 			if($bool =="TRUE"){
 				if($_REQUEST['RESPCODE'] == 01){
 					$pp_response['order_status'] = 'P';
-					$pp_response['reason_text'] = "Thank you. Your order has been processed successfully. ";
+					$pp_response['reason_text'] = "Thank you. Your order has been processed successfully.".$paytmTxnIdText;
 				}
 				else{
 					$pp_response['order_status'] = 'F';
-					$pp_response['reason_text'] = "Thank you. Your order has been unsuccessfull";
+					$pp_response['reason_text'] = "Thank you. Your order has been unsuccessfull".$paytmTxnIdText;
 				}
 			}
 			else {
 				$pp_response['order_status'] = 'D';
-				$pp_response['reason_text'] = "Thank you. Your order has been declined due to security reasons.";
+				$pp_response['reason_text'] = "Thank you. Your order has been declined due to security reasons.".$paytmTxnIdText;
 			}
 			
 			fn_change_order_status($order_id,$pp_response['order_status']);
@@ -79,7 +84,7 @@ if (defined('PAYMENT_NOTIFICATION')) {
 	$paytm_total = fn_format_price($order_info['total']) ;
 	$amount = $paytm_total ;							// Should be in Rupees 
 	$paytm_shipping = fn_order_shipping_cost($order_info);//var_dump($order_info);exit;
-	$paytm_order_id = (($order_info['repaid']) ? ($order_id .'_'. $order_info['repaid']) : $order_id);
+	$paytm_order_id = (($order_info['repaid']) ? ($order_id .'_'. $order_info['repaid']) : $order_id).'-'.time();
 	$date = date('Y-m-d H:i:s');
 	
 	$msg = fn_get_lang_var('text_cc_processor_connection');
