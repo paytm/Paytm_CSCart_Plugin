@@ -72,6 +72,7 @@ if (defined('PAYMENT_NOTIFICATION')) {
 	$current_location = Registry::get('config.current_location');
 	
 	$mod = $processor_data["processor_params"]['transaction_mode'];
+	$callback = $processor_data["processor_params"]['callback'];
 	
 	$log = $processor_data['processor_params']['log_params'];
 	
@@ -110,10 +111,12 @@ if (defined('PAYMENT_NOTIFICATION')) {
             "TXN_AMOUNT" =>  $amount,
             "CHANNEL_ID" => $channel_id,
             "INDUSTRY_TYPE_ID" => $industry_type,
-            "CALLBACK_URL" => $return_url,
-	      		"WEBSITE" => $website_name
+	      		"WEBSITE" => $website_name,
             );
-	
+	if($callback == 'yes')
+	{
+		$post_variables["CALLBACK_URL"] = $return_url;
+	}
 	$secret_key = $processor_data['processor_params']['secret_key'];
 	
 		
@@ -125,6 +128,9 @@ if (defined('PAYMENT_NOTIFICATION')) {
 
 	//$checksum = $sum->calculateChecksum($secret_key,$all);
 	$checksum = getChecksumFromArray($post_variables, $secret_key);//
+	
+	if($callback == 'yes')
+	{
 	echo <<<EOT
 	<html>
 	<body onLoad="document.paytm_form.submit();">
@@ -142,6 +148,25 @@ if (defined('PAYMENT_NOTIFICATION')) {
 	
 	
 EOT;
+	}
+	else{
+		echo <<<EOT
+	<html>
+	<body onLoad="document.paytm_form.submit();">
+	<form action="{$paytm_url}" method="post" name="paytm_form">
+	
+	<input type=hidden name="MID" value="{$merchant_id}">
+	<input type=hidden name="ORDER_ID" value="$paytm_order_id">
+	<input type=hidden name="WEBSITE" value="{$website_name}">
+	<input type=hidden name="INDUSTRY_TYPE_ID" value="{$industry_type}">
+	<input type=hidden name="CHANNEL_ID" value="{$channel_id}">
+	<input type=hidden name="TXN_AMOUNT" value="{$amount}">
+	<input type=hidden name="CUST_ID"  value="{$order_info['email']}">
+    <input type=hidden name="CHECKSUMHASH" value="{$checksum}">
+	
+	
+EOT;
+	}
 
 
 	echo <<<EOT

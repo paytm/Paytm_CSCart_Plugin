@@ -23,6 +23,14 @@
 	<input type="text" name="payment_data[processor_params][channel_id]" id="channel_id" value="{$processor_params.channel_id}" class="input-text" />
 </div>
 
+<div class="form-field">
+	<label for="callback">{__("paytm_callback")}:</label>
+	<select name="payment_data[processor_params][callback]" id="callback">
+		<option value="yes" {if $processor_params.callback == "yes"}selected="selected"{/if}>{__("paytm_callback_yes")}</option>
+		<option value="no" {if $processor_params.callback == "no"}selected="selected"{/if}>{__("paytm_callback_no")}</option>
+	</select>
+</div>
+
 
 <div class="form-field">
 	<label for="transaction_mode">{__("paytm_transaction_mode")}:</label>
@@ -38,4 +46,3 @@
 		<option value="no" {if $processor_params.log_params == "no"}selected="selected"{/if}>{__("paytm_no")}</option>
 	</select>
 </div>
-
