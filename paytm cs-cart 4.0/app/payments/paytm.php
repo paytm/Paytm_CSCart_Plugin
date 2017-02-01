@@ -29,7 +29,10 @@ if (defined('PAYMENT_NOTIFICATION')) {
 				$processor_data = fn_get_processor_data($order_info['email']);
 				}
 	$secret_key = $processor_data["processor_params"]['secret_key'];
-
+	$merchant_id = $processor_data["processor_params"]['merchant_id'];
+	$mod = $processor_data["processor_params"]['transaction_mode'];
+	
+		
 	$bool = "FALSE";
 	$bool = verifychecksum_e($paramList, $secret_key, $checksum_recv);
 	$paytmTxnIdText = "";
@@ -42,8 +45,28 @@ if (defined('PAYMENT_NOTIFICATION')) {
 			$order_info = fn_get_order_info($order_id);			
 			if($bool =="TRUE"){
 				if($_REQUEST['RESPCODE'] == 01){
-					$pp_response['order_status'] = 'P';
-					$pp_response['reason_text'] = "Thank you. Your order has been processed successfully.".$paytmTxnIdText;
+					// Create an array having all required parameters for status query.
+					$requestParamList = array("MID" => $merchant_id , "ORDERID" => $_POST['ORDERID']);
+					
+					// Call the PG's getTxnStatus() function for verifying the transaction status.
+					if($mod=='test')
+					{
+						$check_status_url = 'https://pguat.paytm.com/oltp/HANDLER_INTERNAL/TXNSTATUS';
+					}
+					else
+					{
+						$check_status_url = 'https://secure.paytm.in/oltp/HANDLER_INTERNAL/TXNSTATUS';
+					}
+					$responseParamList = callAPI($check_status_url, $requestParamList);
+					if($responseParamList['STATUS']=='TXN_SUCCESS' && $responseParamList['TXNAMOUNT']==$_POST['TXNAMOUNT'])
+					{
+						$pp_response['order_status'] = 'P';
+						$pp_response['reason_text'] = "Thank you. Your order has been processed successfully.".$paytmTxnIdText;
+					}
+					else{
+						$pp_response['order_status'] = 'D';
+						$pp_response['reason_text'] = "Thank you. Your order has been declined due to security reasons.".$paytmTxnIdText;
+					}
 				}
 				else{
 					$pp_response['order_status'] = 'F';
