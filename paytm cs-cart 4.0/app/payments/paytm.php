@@ -69,7 +69,7 @@ if (defined('PAYMENT_NOTIFICATION')) {
 					}
 					else{
 						$pp_response['order_status'] = 'D';
-						$pp_response['reason_text'] = "Thank you. Your order has been declined due to security reasons.".$paytmTxnIdText;
+						$pp_response['reason_text'] = "It seems some issue in server to server communication. Kindly connect with administrator.".$paytmTxnIdText;
 					}
 				}
 				else{
