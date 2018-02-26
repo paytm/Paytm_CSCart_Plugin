@@ -30,7 +30,9 @@ if (defined('PAYMENT_NOTIFICATION')) {
 				}
 	$secret_key = $processor_data["processor_params"]['secret_key'];
 	$merchant_id = $processor_data["processor_params"]['merchant_id'];
-	$mod = $processor_data["processor_params"]['transaction_mode'];
+	// $mod = $processor_data["processor_params"]['transaction_mode'];
+	$transaction_url = $processor_data["processor_params"]['transaction_url'];
+	$transaction_status_url = $processor_data["processor_params"]['transaction_status_url'];
 	
 		
 	$bool = "FALSE";
@@ -53,14 +55,23 @@ if (defined('PAYMENT_NOTIFICATION')) {
 					$requestParamList['CHECKSUMHASH'] = $StatusCheckSum;
 					
 					// Call the PG's getTxnStatus() function for verifying the transaction status.
-					if($mod=='test')
-					{
-						$check_status_url = 'https://pguat.paytm.com/oltp/HANDLER_INTERNAL/getTxnStatus';
-					}
-					else
-					{
-						$check_status_url = 'https://secure.paytm.in/oltp/HANDLER_INTERNAL/getTxnStatus';
-					}
+					/*	19751/17Jan2018	*/
+						/*if($mod=='test')
+						{
+							$check_status_url = 'https://pguat.paytm.com/oltp/HANDLER_INTERNAL/getTxnStatus';
+						}
+						else
+						{
+							$check_status_url = 'https://secure.paytm.in/oltp/HANDLER_INTERNAL/getTxnStatus';
+						}*/
+
+						/*if($mod=='test') {
+							$check_status_url = 'https://securegw-stage.paytm.in/merchant-status/getTxnStatus';
+						} else {
+							$check_status_url = 'https://securegw.paytm.in/merchant-status/getTxnStatus';
+						}*/
+						$check_status_url = $transaction_status_url;
+					/*	19751/17Jan2018 end	*/
 					$responseParamList = callNewAPI($check_status_url, $requestParamList);
 					if($responseParamList['STATUS']=='TXN_SUCCESS' && $responseParamList['TXNAMOUNT']==$_POST['TXNAMOUNT'])
 					{
@@ -98,16 +109,26 @@ if (defined('PAYMENT_NOTIFICATION')) {
 	$channel_id = $processor_data["processor_params"]['channel_id'];
 	$current_location = Registry::get('config.current_location');
 	
-	$mod = $processor_data["processor_params"]['transaction_mode'];
+	// $mod = $processor_data["processor_params"]['transaction_mode'];
+	$transaction_url = $processor_data["processor_params"]['transaction_url'];
+	$transaction_status_url = $processor_data["processor_params"]['transaction_status_url'];
 	$callback = $processor_data["processor_params"]['callback'];
 	
 	$log = $processor_data['processor_params']['log_params'];
-	
-	if($mod == "test"){
-	$paytm_url =  "https://pguat.paytm.com/oltp-web/processTransaction"; 
-	}else {
-		$paytm_url = "https://secure.paytm.in/oltp-web/processTransaction";	
-	}
+	/*	19751/17Jan2018	*/
+		/*if($mod == "test"){
+			$paytm_url =  "https://pguat.paytm.com/oltp-web/processTransaction"; 
+		}else {
+			$paytm_url = "https://secure.paytm.in/oltp-web/processTransaction";	
+		}*/
+
+		/*if($mod == "test"){
+			$paytm_url =  "https://securegw-stage.paytm.in/theia/processTransaction"; 
+		}else {
+			$paytm_url = "https://securegw.paytm.in/theia/processTransaction";	
+		}*/
+		$paytm_url = $transaction_url;	
+	/*	19751/17Jan2018 end	*/
 	//Order Total
 	$paytm_total = fn_format_price($order_info['total']) ;
 	$amount = $paytm_total ;							// Should be in Rupees 
@@ -124,10 +145,10 @@ if (defined('PAYMENT_NOTIFICATION')) {
 
 		}
 	}
-	if($mod == "test")
+	/*if($mod == "test")
 	$mode = 0;
 	else 
-	$mode = 1;
+	$mode = 1;*/
 	
 	$return_url =fn_url("payment_notification.notify?payment=paytm&order_id=$order_id", AREA, 'http') . '&';
 	
