@@ -40,3 +40,12 @@ Ensure you have a running version of CScart installed. This module supports vers
     5. Click update/save.
 
 Now you can make your payment securely through Paytm by selecting Paytm as the Payment Method at the Checkout stage.
+
+# Paytm PG URL Details
+	staging	
+		Transaction URL             => https://securegw-stage.paytm.in/theia/processTransaction
+		Transaction Status Url      => https://securegw-stage.paytm.in/merchant-status/getTxnStatus
+
+	Production
+		Transaction URL             => https://securegw.paytm.in/theia/processTransaction
+		Transaction Status Url      => https://securegw.paytm.in/merchant-status/getTxnStatus
