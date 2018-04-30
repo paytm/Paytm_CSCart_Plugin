@@ -18,9 +18,10 @@ Ensure you have a running version of CScart installed. This module supports vers
         REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_industry_type','Industry Type Id');
         REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_website_name','Website');
         REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_channel_id','Channel Id');
-        REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_transaction_mode','Transaction Mode');
-        REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_live','Live');
-        REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_test','Test');
+        REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_version_txt','Paytm plugin updated on 30 April 2018.');
+        REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_transaction_url','Transaction URL');
+        REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_transaction_status_url','Transaction Status URL');
+        REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_custom_callbackurl','Custom Callback URL (if you want)');
         REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_log_params','Log');
         REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_yes','Yes');
         REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_no','No');
@@ -33,19 +34,7 @@ Ensure you have a running version of CScart installed. This module supports vers
  2. Choose *Payment Methods* under the *Administration* tab, you will see *Paytm* under the Payment method if the module gets insatalled properly. Click on Edit and configure the following: 
     1. paytm Merchant ID: The Merchant Id provided by paytm.
     2. paytm Secret Key: Please note that get this key ,login to your paytm merchant account and visit the "URL and Key's" section at the "Integration" tab and generate a Key.
-    3. Transaction Mode: Choose the mode you want to make transaction in.
-        - Test(Sandbox)
-        - Live.
-    4. Choose *yes* if you want to log the parameters which are posting to Paytm.(you can see the logs in the php error log file).
-    5. Click update/save.
+    3. Choose *yes* if you want to log the parameters which are posting to Paytm.(you can see the logs in the php error log file).
+    4. Click update/save.
 
 Now you can make your payment securely through Paytm by selecting Paytm as the Payment Method at the Checkout stage.
-
-# Paytm PG URL Details
-	staging	
-		Transaction URL             => https://securegw-stage.paytm.in/theia/processTransaction
-		Transaction Status Url      => https://securegw-stage.paytm.in/merchant-status/getTxnStatus
-
-	Production
-		Transaction URL             => https://securegw.paytm.in/theia/processTransaction
-		Transaction Status Url      => https://securegw.paytm.in/merchant-status/getTxnStatus

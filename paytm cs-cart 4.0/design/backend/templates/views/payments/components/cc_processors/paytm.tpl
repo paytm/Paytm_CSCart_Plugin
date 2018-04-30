@@ -24,34 +24,28 @@
 </div>
 
 <div class="form-field">
-	<label for="channel_id">{__("paytm_transaction_url")}:</label>
+	<label for="custom_callbackurl">{__("paytm_custom_callbackurl")}:</label>
+	<input type="text" name="payment_data[processor_params][custom_callbackurl]" id="custom_callbackurl" value="{$processor_params.custom_callbackurl}" class="input-text" />
+</div>
+
+<div class="form-field">
+	<label for="transaction_url">{__("paytm_transaction_url")}:</label>
 	<input type="text" name="payment_data[processor_params][transaction_url]" id="transaction_url" value="{$processor_params.transaction_url}" class="input-text" />
 </div>
 <div class="form-field">
-	<label for="channel_id">{__("paytm_transaction_status_url")}:</label>
+	<label for="transaction_status_url">{__("paytm_transaction_status_url")}:</label>
 	<input type="text" name="payment_data[processor_params][transaction_status_url]" id="transaction_status_url" value="{$processor_params.transaction_status_url}" class="input-text" />
 </div>
-
-<div class="form-field">
-	<label for="callback">{__("paytm_callback")}:</label>
-	<select name="payment_data[processor_params][callback]" id="callback">
-		<option value="yes" {if $processor_params.callback == "yes"}selected="selected"{/if}>{__("paytm_callback_yes")}</option>
-		<option value="no" {if $processor_params.callback == "no"}selected="selected"{/if}>{__("paytm_callback_no")}</option>
-	</select>
-</div>
-
-
-<!-- <div class="form-field">
-	<label for="transaction_mode">{__("paytm_transaction_mode")}:</label>
-	<select name="payment_data[processor_params][transaction_mode]" id="transaction_mode">
-		<option value="test" {if $processor_params.transaction_mode == "test"}selected="selected"{/if}>{__("paytm_test")}</option>
-		<option value="live" {if $processor_params.transaction_mode == "live"}selected="selected"{/if}>{__("paytm_live")}</option>
-	</select>
-</div> -->
 <div class="form-field">
 	<label for="log_params">{__("paytm_log_params")}:</label>
 	<select name="payment_data[processor_params][log_params]" id="log_params">
 		<option value="yes" {if $processor_params.log_params == "yes"}selected="selected"{/if}>{__("paytm_yes")}</option>
 		<option value="no" {if $processor_params.log_params == "no"}selected="selected"{/if}>{__("paytm_no")}</option>
 	</select>
+</div>
+<div class="form-field">
+	<label for="log_params"></label>
+</div>
+<div class="form-field">
+	<label for="log_params">{__("paytm_version_txt")}</label>
 </div>

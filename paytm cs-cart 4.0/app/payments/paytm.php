@@ -112,8 +112,8 @@ if (defined('PAYMENT_NOTIFICATION')) {
 	// $mod = $processor_data["processor_params"]['transaction_mode'];
 	$transaction_url = $processor_data["processor_params"]['transaction_url'];
 	$transaction_status_url = $processor_data["processor_params"]['transaction_status_url'];
-	$callback = $processor_data["processor_params"]['callback'];
-	
+	// $callback = $processor_data["processor_params"]['callback'];
+	$customCallBackUrl = $processor_data["processor_params"]['paytm_custom_callbackurl'];
 	$log = $processor_data['processor_params']['log_params'];
 	/*	19751/17Jan2018	*/
 		/*if($mod == "test"){
@@ -161,10 +161,10 @@ if (defined('PAYMENT_NOTIFICATION')) {
             "INDUSTRY_TYPE_ID" => $industry_type,
 	      		"WEBSITE" => $website_name,
             );
-	if($callback == 'yes')
-	{
+	/*if($callback == 'yes') {
 		$post_variables["CALLBACK_URL"] = $return_url;
-	}
+	}*/
+	$return_url=trim($customCallBackUrl)!=''?$customCallBackUrl:$return_url;
 	$secret_key = $processor_data['processor_params']['secret_key'];
 	
 		
@@ -177,47 +177,20 @@ if (defined('PAYMENT_NOTIFICATION')) {
 	//$checksum = $sum->calculateChecksum($secret_key,$all);
 	$checksum = getChecksumFromArray($post_variables, $secret_key);//
 	
-	if($callback == 'yes')
-	{
 	echo <<<EOT
 	<html>
 	<body onLoad="document.paytm_form.submit();">
 	<form action="{$paytm_url}" method="post" name="paytm_form">
 	
-	<input type=hidden name="MID" value="{$merchant_id}">
-	<input type=hidden name="ORDER_ID" value="$paytm_order_id">
-	<input type=hidden name="WEBSITE" value="{$website_name}">
-	<input type=hidden name="INDUSTRY_TYPE_ID" value="{$industry_type}">
-	<input type=hidden name="CHANNEL_ID" value="{$channel_id}">
-	<input type=hidden name="TXN_AMOUNT" value="{$amount}">
-	<input type=hidden name="CUST_ID"  value="{$order_info['email']}">
-    <input type=hidden name="CALLBACK_URL" value="{$return_url}"> 
-	<input type=hidden name="CHECKSUMHASH" value="{$checksum}">
-	
-	
-EOT;
-	}
-	else{
-		echo <<<EOT
-	<html>
-	<body onLoad="document.paytm_form.submit();">
-	<form action="{$paytm_url}" method="post" name="paytm_form">
-	
-	<input type=hidden name="MID" value="{$merchant_id}">
-	<input type=hidden name="ORDER_ID" value="$paytm_order_id">
-	<input type=hidden name="WEBSITE" value="{$website_name}">
-	<input type=hidden name="INDUSTRY_TYPE_ID" value="{$industry_type}">
-	<input type=hidden name="CHANNEL_ID" value="{$channel_id}">
-	<input type=hidden name="TXN_AMOUNT" value="{$amount}">
-	<input type=hidden name="CUST_ID"  value="{$order_info['email']}">
-    <input type=hidden name="CHECKSUMHASH" value="{$checksum}">
-	
-	
-EOT;
-	}
-
-
-	echo <<<EOT
+		<input type=hidden name="MID" value="{$merchant_id}">
+		<input type=hidden name="ORDER_ID" value="$paytm_order_id">
+		<input type=hidden name="WEBSITE" value="{$website_name}">
+		<input type=hidden name="INDUSTRY_TYPE_ID" value="{$industry_type}">
+		<input type=hidden name="CHANNEL_ID" value="{$channel_id}">
+		<input type=hidden name="TXN_AMOUNT" value="{$amount}">
+		<input type=hidden name="CUST_ID"  value="{$order_info['email']}">
+	    <input type=hidden name="CALLBACK_URL" value="{$return_url}"> 
+		<input type=hidden name="CHECKSUMHASH" value="{$checksum}">
 	</form>
 	<div align=center>{$msg}</div>
 	</body>
