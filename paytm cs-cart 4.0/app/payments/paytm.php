@@ -164,7 +164,7 @@ if (defined('PAYMENT_NOTIFICATION')) {
 	/*if($callback == 'yes') {
 		$post_variables["CALLBACK_URL"] = $return_url;
 	}*/
-	$return_url=trim($customCallBackUrl)!=''?$customCallBackUrl:$return_url;
+	$post_variables['CALLBACK_URL']=$return_url=trim($customCallBackUrl)!=''?$customCallBackUrl:$return_url;
 	$secret_key = $processor_data['processor_params']['secret_key'];
 	
 		
