@@ -12,7 +12,6 @@ include_once('encdec_paytm.php');
 
 if (!defined('BOOTSTRAP')) { die('Access denied'); }
 // Handling response from paytm 
-
 if (defined('PAYMENT_NOTIFICATION')) {
 
 	
@@ -49,29 +48,9 @@ if (defined('PAYMENT_NOTIFICATION')) {
 				if($_REQUEST['RESPCODE'] == 01){
 					// Create an array having all required parameters for status query.
 					$requestParamList = array("MID" => $merchant_id , "ORDERID" => $_POST['ORDERID']);
-					
 					$StatusCheckSum = getChecksumFromArray($requestParamList, $secret_key);
-							
 					$requestParamList['CHECKSUMHASH'] = $StatusCheckSum;
-					
-					// Call the PG's getTxnStatus() function for verifying the transaction status.
-					/*	19751/17Jan2018	*/
-						/*if($mod=='test')
-						{
-							$check_status_url = 'https://pguat.paytm.com/oltp/HANDLER_INTERNAL/getTxnStatus';
-						}
-						else
-						{
-							$check_status_url = 'https://secure.paytm.in/oltp/HANDLER_INTERNAL/getTxnStatus';
-						}*/
-
-						/*if($mod=='test') {
-							$check_status_url = 'https://securegw-stage.paytm.in/merchant-status/getTxnStatus';
-						} else {
-							$check_status_url = 'https://securegw.paytm.in/merchant-status/getTxnStatus';
-						}*/
-						$check_status_url = $transaction_status_url;
-					/*	19751/17Jan2018 end	*/
+					$check_status_url = $transaction_status_url;
 					$responseParamList = callNewAPI($check_status_url, $requestParamList);
 					if($responseParamList['STATUS']=='TXN_SUCCESS' && $responseParamList['TXNAMOUNT']==$_POST['TXNAMOUNT'])
 					{
@@ -102,34 +81,27 @@ if (defined('PAYMENT_NOTIFICATION')) {
 	}
 } 
 }else {
-	
 	$merchant_id = $processor_data["processor_params"]['merchant_id'];
 	$industry_type = $processor_data["processor_params"]['industry_type'];
 	$website_name = $processor_data["processor_params"]['website_name'];
 	$channel_id = $processor_data["processor_params"]['channel_id'];
 	$current_location = Registry::get('config.current_location');
-	
-	// $mod = $processor_data["processor_params"]['transaction_mode'];
+
+	$promoCodeView=$processor_data["processor_params"]['promo_code_view'];
+	$promoLocalValidation=$processor_data["processor_params"]['promo_local_validation'];
+	$promoCode=$processor_data["processor_params"]['promo_code'];
+	$userEnterCode=$order_info['payment_info']['paytmPromoCode'];
+	$addPromoInReq=false;
+	if($promoCodeView=='yes' && trim($userEnterCode)!=''){
+		$addPromoInReq=true;
+		$userEnterCode=trim($userEnterCode);
+	}
 	$transaction_url = $processor_data["processor_params"]['transaction_url'];
 	$transaction_status_url = $processor_data["processor_params"]['transaction_status_url'];
-	// $callback = $processor_data["processor_params"]['callback'];
 	$customCallBackUrl = $processor_data["processor_params"]['paytm_custom_callbackurl'];
 	$log = $processor_data['processor_params']['log_params'];
-	/*	19751/17Jan2018	*/
-		/*if($mod == "test"){
-			$paytm_url =  "https://pguat.paytm.com/oltp-web/processTransaction"; 
-		}else {
-			$paytm_url = "https://secure.paytm.in/oltp-web/processTransaction";	
-		}*/
-
-		/*if($mod == "test"){
-			$paytm_url =  "https://securegw-stage.paytm.in/theia/processTransaction"; 
-		}else {
-			$paytm_url = "https://securegw.paytm.in/theia/processTransaction";	
-		}*/
-		$paytm_url = $transaction_url;	
-	/*	19751/17Jan2018 end	*/
 	//Order Total
+	$paytm_url = $transaction_url;	
 	$paytm_total = fn_format_price($order_info['total']) ;
 	$amount = $paytm_total ;							// Should be in Rupees 
 	$paytm_shipping = fn_order_shipping_cost($order_info);//var_dump($order_info);exit;
@@ -145,13 +117,7 @@ if (defined('PAYMENT_NOTIFICATION')) {
 
 		}
 	}
-	/*if($mod == "test")
-	$mode = 0;
-	else 
-	$mode = 1;*/
-	
 	$return_url =fn_url("payment_notification.notify?payment=paytm&order_id=$order_id", AREA, 'http') . '&';
-	
 	$post_variables = Array(
             "MID" =>  $merchant_id,
             "ORDER_ID" => $paytm_order_id,
@@ -161,10 +127,10 @@ if (defined('PAYMENT_NOTIFICATION')) {
             "INDUSTRY_TYPE_ID" => $industry_type,
 	      		"WEBSITE" => $website_name,
             );
-	/*if($callback == 'yes') {
-		$post_variables["CALLBACK_URL"] = $return_url;
-	}*/
 	$post_variables['CALLBACK_URL']=$return_url=trim($customCallBackUrl)!=''?$customCallBackUrl:$return_url;
+	if($addPromoInReq){
+		$post_variables['PROMO_CAMP_ID']=$userEnterCode;
+	}
 	$secret_key = $processor_data['processor_params']['secret_key'];
 	
 		
@@ -174,28 +140,51 @@ if (defined('PAYMENT_NOTIFICATION')) {
 		error_log("paytm Secret Key : " .$secret_key);
 	}
 
-	//$checksum = $sum->calculateChecksum($secret_key,$all);
 	$checksum = getChecksumFromArray($post_variables, $secret_key);//
+	// echo "<pre>";print_r($post_variables);print_r($checksum);var_dump($addPromoInReq);die;
 	
-	echo <<<EOT
-	<html>
-	<body onLoad="document.paytm_form.submit();">
-	<form action="{$paytm_url}" method="post" name="paytm_form">
-	
-		<input type=hidden name="MID" value="{$merchant_id}">
-		<input type=hidden name="ORDER_ID" value="$paytm_order_id">
-		<input type=hidden name="WEBSITE" value="{$website_name}">
-		<input type=hidden name="INDUSTRY_TYPE_ID" value="{$industry_type}">
-		<input type=hidden name="CHANNEL_ID" value="{$channel_id}">
-		<input type=hidden name="TXN_AMOUNT" value="{$amount}">
-		<input type=hidden name="CUST_ID"  value="{$order_info['email']}">
-	    <input type=hidden name="CALLBACK_URL" value="{$return_url}"> 
-		<input type=hidden name="CHECKSUMHASH" value="{$checksum}">
-	</form>
-	<div align=center>{$msg}</div>
-	</body>
-	</html>
+	if($addPromoInReq){
+		echo <<<EOT
+		<html>
+		<body onLoad="document.paytm_form.submit();">
+		<form action="{$paytm_url}" method="post" name="paytm_form">
+		
+			<input type=hidden name="MID" value="{$merchant_id}">
+			<input type=hidden name="PROMO_CAMP_ID" value="{$userEnterCode}">
+			<input type=hidden name="ORDER_ID" value="$paytm_order_id">
+			<input type=hidden name="WEBSITE" value="{$website_name}">
+			<input type=hidden name="INDUSTRY_TYPE_ID" value="{$industry_type}">
+			<input type=hidden name="CHANNEL_ID" value="{$channel_id}">
+			<input type=hidden name="TXN_AMOUNT" value="{$amount}">
+			<input type=hidden name="CUST_ID"  value="{$order_info['email']}">
+		    <input type=hidden name="CALLBACK_URL" value="{$return_url}"> 
+			<input type=hidden name="CHECKSUMHASH" value="{$checksum}">
+		</form>
+		<div align=center>{$msg}</div>
+		</body>
+		</html>
 EOT;
+	}else{
+		echo <<<EOT
+		<html>
+		<body onLoad="document.paytm_form.submit();">
+		<form action="{$paytm_url}" method="post" name="paytm_form">
+		
+			<input type=hidden name="MID" value="{$merchant_id}">
+			<input type=hidden name="ORDER_ID" value="$paytm_order_id">
+			<input type=hidden name="WEBSITE" value="{$website_name}">
+			<input type=hidden name="INDUSTRY_TYPE_ID" value="{$industry_type}">
+			<input type=hidden name="CHANNEL_ID" value="{$channel_id}">
+			<input type=hidden name="TXN_AMOUNT" value="{$amount}">
+			<input type=hidden name="CUST_ID"  value="{$order_info['email']}">
+		    <input type=hidden name="CALLBACK_URL" value="{$return_url}"> 
+			<input type=hidden name="CHECKSUMHASH" value="{$checksum}">
+		</form>
+		<div align=center>{$msg}</div>
+		</body>
+		</html>
+EOT;
+	}
 
 	fn_flush();
 }

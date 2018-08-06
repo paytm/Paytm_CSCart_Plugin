@@ -1,40 +1,33 @@
-# INSTALLATION STEPS
-Ensure you have a running version of CScart installed. This module supports version 3.0.2 and upwards.
+#### Database Query
+  1. REPLACE INTO `cscart_payment_processors` (`processor_id`, `processor`, `processor_script`, `processor_template`, `admin_template`, `callback`, `type`) VALUES (1000, 'Paytm', 'paytm.php', 'views/orders/components/payments/paytm.tpl', 'paytm.tpl', 'Y', 'P');
+  2. insert into `cscart_payment_descriptions` (`payment_id`, `payment`, `description`, `instructions`, `surcharge_title`, `lang_code`) values('14','Paytm','Simplifying Payments',' ','','EN');
+  3. REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_merchant_id','Merchant ID');
+  4. REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_secret_key','Merchant Key');
+  5. REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_industry_type','Industry Type Id');
+  6. REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_website_name','Website');
+  7. REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_channel_id','Channel Id');
+  8. REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_version_txt','Paytm plugin updated on 06 Aug 2018.');
+  9. REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_transaction_url','Transaction URL');
+  10. REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_transaction_status_url','Transaction Status URL');
+  11. REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_custom_callbackurl','Custom Callback URL (if you want)');
+  12. REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_log_params','Log');
+  13. REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_yes','Yes');
+  14. REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_no','No');
+  15. REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_promo_code','Promo Code Value');
+  16. REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_promo_code_view','Promo Code');
+  17. REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_promo_code_view_yes','Yes');
+  18. REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_promo_code_view_no','No');
+  19. REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_promo_code_local_validation','Local Validation');
+  20. REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_promo_code_local_validation_yes','Yes');
+  21. REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_promo_code_local_validation_no','No');
 
- 1. Execute the following queries in the backend (database)
- 
- ```sh	
-  1. REPLACE INTO `cscart_payment_processors` (`processor_id`, `processor`, `processor_script`,	`processor_template`, `admin_template`, `callback`, `type`) VALUES (1000, 'Paytm', 'paytm.php',	'views/orders/components/payments/cc_outside.tpl', 'paytm.tpl', 'N', 'P');
- ```
- ```sh
-  2. insert into `cscart_payments` (`payment_id`, `company_id`, `usergroup_ids`, `position`, `status`, `template`, `processor_id`, `processor_params`, `a_surcharge`, `p_surcharge`, `tax_ids`, `localization`, `payment_category`) values('14','1','0','0','A','views/orders/components/payments/cc_outside.tpl','1000','a:7:{s:11:\"merchant_id\";s:0:\"\";s:10:\"secret_key\";s:0:\"\";s:13:\"industry_type\";s:0:\"\";s:12:\"website_name\";s:0:\"\";s:10:\"channel_id\";s:0:\"\";s:16:\"transaction_mode\";s:4:\"test\";s:10:\"log_params\";s:2:\"no\";}','0.000','0.000','','','tab3');
- ```
- ```sh
-  3. insert into `cscart_payment_descriptions` (`payment_id`, `payment`, `description`, `instructions`, `surcharge_title`, `lang_code`) values('14','Paytm','Simplifying Payments',' ','','EN');
- ```
- ```sh
-  4. REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_merchant_id','Merchant ID');
-        REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_secret_key','Merchant Key');
-        REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_industry_type','Industry Type Id');
-        REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_website_name','Website');
-        REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_channel_id','Channel Id');
-        REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_version_txt','Paytm plugin updated on 16 May 2018.');
-        REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_transaction_url','Transaction URL');
-        REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_transaction_status_url','Transaction Status URL');
-        REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_custom_callbackurl','Custom Callback URL (if you want)');
-        REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_log_params','Log');
-        REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_yes','Yes');
-        REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_no','No');
- ```
- 2. Copy the files present in the folder "app/payments" and paste it to (root_dir)/app/payments/
- 3. Copy the file present in the folder "/design/backend/templates/views/payments/components/cc_processors" and paste it to (root_dir)/design/backend/templates/views/payments/components/cc_processors
+#### Installation/Configurations
+  1. Upload the contents of the plugin to your CS Cart Installation directory (content of app folder goes in app folder, content of design folder in design folder).
+  2. Log into CS-Cart as administrator. Navigate to Administration / Payment Methods.
+  3. Click the "+" to add a new payment method.
+  4. Choose Paytm from the list and then click save. For template, choose "paytm.tpl"
+  5. Click the 'Configure' tab.
+  6. Enter your Paytm Details.
+  7. Click 'Save'
 
-# CONFIGURATIONS FOR CSCart SETTINGS
- 1. Login to the administrator area of cscart,
- 2. Choose *Payment Methods* under the *Administration* tab, you will see *Paytm* under the Payment method if the module gets insatalled properly. Click on Edit and configure the following: 
-    1. paytm Merchant ID: The Merchant Id provided by paytm.
-    2. paytm Secret Key: Please note that get this key ,login to your paytm merchant account and visit the "URL and Key's" section at the "Integration" tab and generate a Key.
-    3. Choose *yes* if you want to log the parameters which are posting to Paytm.(you can see the logs in the php error log file).
-    4. Click update/save.
-
-Now you can make your payment securely through Paytm by selecting Paytm as the Payment Method at the Checkout stage.
+#### In case of any query, please contact to Paytm.

@@ -37,6 +37,24 @@
 	<input type="text" name="payment_data[processor_params][transaction_status_url]" id="transaction_status_url" value="{$processor_params.transaction_status_url}" class="input-text" />
 </div>
 <div class="form-field">
+	<label for="promo_code_view">{__("paytm_promo_code_view")}:</label>
+	<select name="payment_data[processor_params][promo_code_view]" id="promo_code_view">
+		<option value="no" {if $processor_params.promo_code_view == "no"}selected="selected"{/if}>{__("paytm_promo_code_view_no")}</option>
+		<option value="yes" {if $processor_params.promo_code_view == "yes"}selected="selected"{/if}>{__("paytm_promo_code_view_yes")}</option>
+	</select>
+</div>
+<div class="form-field">
+	<label for="promo_code_view">{__("paytm_promo_code_local_validation")}:</label>
+	<select name="payment_data[processor_params][promo_local_validation]" id="promo_code_view">
+		<option value="no" {if $processor_params.promo_local_validation == "no"}selected="selected"{/if}>{__("paytm_promo_code_local_validation_no")}</option>
+		<option value="yes" {if $processor_params.promo_local_validation == "yes"}selected="selected"{/if}>{__("paytm_promo_code_local_validation_yes")}</option>
+	</select>
+</div>
+<div class="form-field">
+	<label for="promo_code">{__("paytm_promo_code")}:</label>
+	<input type="text" name="payment_data[processor_params][promo_code]" id="promo_code" value="{$processor_params.promo_code}" class="input-text" />
+</div>
+<div class="form-field">
 	<label for="log_params">{__("paytm_log_params")}:</label>
 	<select name="payment_data[processor_params][log_params]" id="log_params">
 		<option value="yes" {if $processor_params.log_params == "yes"}selected="selected"{/if}>{__("paytm_yes")}</option>
