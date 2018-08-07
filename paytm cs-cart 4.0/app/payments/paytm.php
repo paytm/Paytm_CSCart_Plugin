@@ -13,71 +13,108 @@ include_once('encdec_paytm.php');
 if (!defined('BOOTSTRAP')) { die('Access denied'); }
 // Handling response from paytm 
 if (defined('PAYMENT_NOTIFICATION')) {
+	if($_GET['dispatch']=='payment_notification.curlTest'){
+		$testing_urls = array(
+			fn_url(''),
+			"www.google.co.in",
+			"https://pguat.paytm.com/oltp/HANDLER_INTERNAL/getTxnStatus",
+		);
+		foreach($testing_urls as $key=>$url){
+			$debug[$key]["info"][] = "Connecting to <b>" . $url . "</b> using cURL";
+			$ch = curl_init($url);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+			$res = curl_exec($ch);
+			$content='';
+			if (!curl_errno($ch)) {
+				$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+				$debug[$key]["info"][] = "cURL executed succcessfully.";
+				$debug[$key]["info"][] = "HTTP Response Code: <b>". $http_code . "</b>";
+				$content = $res;
+			} else {
+				$debug[$key]["info"][] = "Connection Failed !!";
+				$debug[$key]["info"][] = "Error Code: <b>" . curl_errno($ch) . "</b>";
+				$debug[$key]["info"][] = "Error: <b>" . curl_error($ch) . "</b>";
+				break;
+			}
+			curl_close($ch);
+		}
+		foreach($debug as $k=>$v){
+			echo "<ul>";
+			foreach($v["info"] as $info){
+				echo "<li>".$info."</li>";
+			}
+			if($k==(sizeof($debug)-1)){
+				echo "<li>".$content."</li>";
+			}
+			echo "</ul>";
+			echo "<hr/>";
+		}
+		die;
+	}else{
+		$joint_order_id		= explode("-",$_POST['ORDERID']);
+		$order_id			= $joint_order_id[0];
+		$res_code			= $_POST['RESPCODE'];
+		$res_desc			= $_POST['RESPMSG'];
+		$checksum_recv		= $_POST['CHECKSUMHASH'];
+		$paramList			= $_POST;
 
-	
-	$joint_order_id		= explode("-",$_POST['ORDERID']);
-	$order_id			= $joint_order_id[0];
-	$res_code			= $_POST['RESPCODE'];
-	$res_desc			= $_POST['RESPMSG'];
-	$checksum_recv		= $_POST['CHECKSUMHASH'];
-	$paramList			= $_POST;
-
-	if (fn_check_payment_script('paytm.php', $order_id, $processor_data)){
-	
-		if (empty($processor_data)) {
-				$processor_data = fn_get_processor_data($order_info['email']);
-				}
-	$secret_key = $processor_data["processor_params"]['secret_key'];
-	$merchant_id = $processor_data["processor_params"]['merchant_id'];
-	// $mod = $processor_data["processor_params"]['transaction_mode'];
-	$transaction_url = $processor_data["processor_params"]['transaction_url'];
-	$transaction_status_url = $processor_data["processor_params"]['transaction_status_url'];
-	
+		if (fn_check_payment_script('paytm.php', $order_id, $processor_data)){
 		
-	$bool = "FALSE";
-	$bool = verifychecksum_e($paramList, $secret_key, $checksum_recv);
-	$paytmTxnIdText = "";
-	if(isset($_POST['TXNID']) && !empty($_POST['TXNID'])){
-		$paytmTxnIdText = " Paytm Transaction Id : ".$_POST['TXNID'];
-	}
-	if (!empty($order_id)) {		
-		if (fn_check_payment_script('paytm.php', $order_id, $processor_data)) {		
-			$pp_response = array();			
-			$order_info = fn_get_order_info($order_id);			
-			if($bool =="TRUE"){
-				if($_REQUEST['RESPCODE'] == 01){
-					// Create an array having all required parameters for status query.
-					$requestParamList = array("MID" => $merchant_id , "ORDERID" => $_POST['ORDERID']);
-					$StatusCheckSum = getChecksumFromArray($requestParamList, $secret_key);
-					$requestParamList['CHECKSUMHASH'] = $StatusCheckSum;
-					$check_status_url = $transaction_status_url;
-					$responseParamList = callNewAPI($check_status_url, $requestParamList);
-					if($responseParamList['STATUS']=='TXN_SUCCESS' && $responseParamList['TXNAMOUNT']==$_POST['TXNAMOUNT'])
-					{
-						$pp_response['order_status'] = 'P';
-						$pp_response['reason_text'] = "Thank you. Your order has been processed successfully.".$paytmTxnIdText;
+			if (empty($processor_data)) {
+					$processor_data = fn_get_processor_data($order_info['email']);
+					}
+		$secret_key = $processor_data["processor_params"]['secret_key'];
+		$merchant_id = $processor_data["processor_params"]['merchant_id'];
+		// $mod = $processor_data["processor_params"]['transaction_mode'];
+		$transaction_url = $processor_data["processor_params"]['transaction_url'];
+		$transaction_status_url = $processor_data["processor_params"]['transaction_status_url'];
+		
+			
+		$bool = "FALSE";
+		$bool = verifychecksum_e($paramList, $secret_key, $checksum_recv);
+		$paytmTxnIdText = "";
+		if(isset($_POST['TXNID']) && !empty($_POST['TXNID'])){
+			$paytmTxnIdText = " Paytm Transaction Id : ".$_POST['TXNID'];
+		}
+		if (!empty($order_id)) {		
+			if (fn_check_payment_script('paytm.php', $order_id, $processor_data)) {		
+				$pp_response = array();			
+				$order_info = fn_get_order_info($order_id);			
+				if($bool =="TRUE"){
+					if($_REQUEST['RESPCODE'] == 01){
+						// Create an array having all required parameters for status query.
+						$requestParamList = array("MID" => $merchant_id , "ORDERID" => $_POST['ORDERID']);
+						$StatusCheckSum = getChecksumFromArray($requestParamList, $secret_key);
+						$requestParamList['CHECKSUMHASH'] = $StatusCheckSum;
+						$check_status_url = $transaction_status_url;
+						$responseParamList = callNewAPI($check_status_url, $requestParamList);
+						if($responseParamList['STATUS']=='TXN_SUCCESS' && $responseParamList['TXNAMOUNT']==$_POST['TXNAMOUNT'])
+						{
+							$pp_response['order_status'] = 'P';
+							$pp_response['reason_text'] = "Thank you. Your order has been processed successfully.".$paytmTxnIdText;
+						}
+						else{
+							$pp_response['order_status'] = 'D';
+							$pp_response['reason_text'] = "It seems some issue in server to server communication. Kindly connect with administrator.".$paytmTxnIdText;
+						}
 					}
 					else{
-						$pp_response['order_status'] = 'D';
-						$pp_response['reason_text'] = "It seems some issue in server to server communication. Kindly connect with administrator.".$paytmTxnIdText;
+						$pp_response['order_status'] = 'F';
+						$pp_response['reason_text'] = "Thank you. Your order has been unsuccessfull".$paytmTxnIdText;
 					}
 				}
-				else{
-					$pp_response['order_status'] = 'F';
-					$pp_response['reason_text'] = "Thank you. Your order has been unsuccessfull".$paytmTxnIdText;
+				else {
+					$pp_response['order_status'] = 'D';
+					$pp_response['reason_text'] = "Thank you. Your order has been declined due to security reasons.".$paytmTxnIdText;
 				}
+				
+				fn_change_order_status($order_id,$pp_response['order_status']);
+	      fn_finish_payment($order_id, $pp_response,array());
+	      fn_order_placement_routines('route',$order_id);
+	      
 			}
-			else {
-				$pp_response['order_status'] = 'D';
-				$pp_response['reason_text'] = "Thank you. Your order has been declined due to security reasons.".$paytmTxnIdText;
-			}
-			
-			fn_change_order_status($order_id,$pp_response['order_status']);
-      fn_finish_payment($order_id, $pp_response,array());
-      fn_order_placement_routines('route',$order_id);
-      
+			exit;
 		}
-		exit;
 	}
 } 
 }else {
