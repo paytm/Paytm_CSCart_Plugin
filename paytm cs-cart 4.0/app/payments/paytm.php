@@ -16,8 +16,8 @@ if (defined('PAYMENT_NOTIFICATION')) {
 	if($_GET['dispatch']=='payment_notification.curlTest'){
 		$testing_urls = array(
 			fn_url(''),
-			"www.google.co.in",
-			"https://pguat.paytm.com/oltp/HANDLER_INTERNAL/getTxnStatus",
+			"https://www.gstatic.com/generate_204",
+			"https://securegw.paytm.in/merchant-status/getTxnStatus",
 		);
 		foreach($testing_urls as $key=>$url){
 			$debug[$key]["info"][] = "Connecting to <b>" . $url . "</b> using cURL";
