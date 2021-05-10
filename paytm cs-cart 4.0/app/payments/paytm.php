@@ -8,7 +8,7 @@
 if ( !defined('AREA') ) { die('Access denied'); }
 use Tygh\Registry;
 
-include_once('encdec_paytm.php');
+//include_once('encdec_paytm.php');
 
 require_once('PaytmChecksum.php');
 require_once('PaytmHelper.php');
@@ -18,6 +18,7 @@ require_once('PaytmConstants.php');
 
 if (!defined('BOOTSTRAP')) { die('Access denied'); }
 // Handling response from paytm 
+
 if (defined('PAYMENT_NOTIFICATION')) {
 	if($_GET['dispatch']=='payment_notification.curlTest'){
 		$testing_urls = array(
@@ -63,69 +64,62 @@ if (defined('PAYMENT_NOTIFICATION')) {
 		$res_desc			= $_POST['RESPMSG'];
 		$checksum_recv		= $_POST['CHECKSUMHASH'];
 		$paramList			= $_POST;
-
 		if (fn_check_payment_script('paytm.php', $order_id, $processor_data)){
-		
 			if (empty($processor_data)) {
-					$processor_data = fn_get_processor_data($order_info['email']);
-					}
-		$secret_key = $processor_data["processor_params"]['secret_key'];
-		$merchant_id = $processor_data["processor_params"]['merchant_id'];
-		// $mod = $processor_data["processor_params"]['transaction_mode'];
-		$transaction_url = $processor_data["processor_params"]['transaction_url'];
-		$transaction_status_url = $processor_data["processor_params"]['transaction_status_url'];
-		
-			
-		$bool = "FALSE";
-		$bool = verifychecksum_e($paramList, $secret_key, $checksum_recv);
-		$paytmTxnIdText = "";
-		if(isset($_POST['TXNID']) && !empty($_POST['TXNID'])){
-			$paytmTxnIdText = " Paytm Transaction Id : ".$_POST['TXNID'];
-		}
-		if (!empty($order_id)) {		
-			if (fn_check_payment_script('paytm.php', $order_id, $processor_data)) {		
-				$pp_response = array();			
-				$order_info = fn_get_order_info($order_id);			
-				if($bool =="TRUE"){
-					if($_REQUEST['RESPCODE'] == 01){
-						// Create an array having all required parameters for status query.
-						$requestParamList = array("MID" => $merchant_id , "ORDERID" => $_POST['ORDERID']);
-						$StatusCheckSum = getChecksumFromArray($requestParamList, $secret_key);
-						$requestParamList['CHECKSUMHASH'] = $StatusCheckSum;
-						$check_status_url = $transaction_status_url;
-						$responseParamList = callNewAPI($check_status_url, $requestParamList);
-						if($responseParamList['STATUS']=='TXN_SUCCESS' && $responseParamList['TXNAMOUNT']==$_POST['TXNAMOUNT'])
-						{
-							$pp_response['order_status'] = 'P';
-							$pp_response['reason_text'] = "Thank you. Your order has been processed successfully.".$paytmTxnIdText;
-						}
-						else{
-							$pp_response['order_status'] = 'D';
-							$pp_response['reason_text'] = "It seems some issue in server to server communication. Kindly connect with administrator.".$paytmTxnIdText;
-						}
-					}
-					else{
-						$pp_response['order_status'] = 'F';
-						$pp_response['reason_text'] = "Thank you. Your order has been unsuccessfull".$paytmTxnIdText;
-					}
-				}
-				else {
-					$pp_response['order_status'] = 'D';
-					$pp_response['reason_text'] = "Thank you. Your order has been declined due to security reasons.".$paytmTxnIdText;
-				}
-				
-				fn_change_order_status($order_id,$pp_response['order_status']);
-	      fn_finish_payment($order_id, $pp_response,array());
-	      fn_order_placement_routines('route',$order_id);
-	      
+				$processor_data = fn_get_processor_data($order_info['email']);
 			}
-			exit;
-		}
-	}
-} 
-}else {
+			$secret_key = $processor_data["processor_params"]['secret_key'];
+			$merchant_id = $processor_data["processor_params"]['merchant_id'];
+			if( $processor_data["processor_params"]['environment'] == "Staging"){
+				$env = 0;
+			}else{
+				$env = 1;
+			}
+			// $mod = $processor_data["processor_params"]['transaction_mode'];
 
-	//echo "<pre>";print_r($processor_data);die;
+			if(!empty($_POST['CHECKSUMHASH'])){
+	            $post_checksum = $_POST['CHECKSUMHASH'];
+	            unset($_POST['CHECKSUMHASH']);  
+	        }else{
+	            $post_checksum = "";
+	        }
+
+	        $isValidChecksum = PaytmChecksum::verifySignature($_POST, $secret_key, $post_checksum);
+	        if($isValidChecksum === true)
+	        {
+	        	$reqParams = array(
+	                "MID"       => $merchant_id,
+	                "ORDERID"   => $_POST['ORDERID']
+	            );
+
+	            $reqParams['CHECKSUMHASH'] = PaytmChecksum::generateSignature($reqParams, $secret_key);
+	            /* number of retries untill cURL gets success */
+	            $retry = 1;
+	            do{
+	                $postData = 'JsonData='.urlencode(json_encode($reqParams));
+	                $resParams = PaytmHelper::executecUrl(PaytmHelper::getPaytmURL(PaytmConstants::ORDER_STATUS_URL, $env), $postData);
+	                $retry++;
+
+	               
+	            } while(!$resParams['STATUS'] && $retry < PaytmConstants::MAX_RETRY_COUNT);
+	            if($resParams['STATUS'] == 'TXN_SUCCESS') {            	
+					$pp_response['order_status'] = 'P';
+					$pp_response['reason_text'] = "Thank you. Your order has been processed successfully.".$paytmTxnIdText;
+	            }else{
+					$pp_response['order_status'] = 'D';
+					$pp_response['reason_text'] = "It seems some issue in server to server communication. Kindly connect with administrator.".$paytmTxnIdText;
+				}
+	        }else{
+	        	$pp_response['order_status'] = 'D';
+				$pp_response['reason_text'] = "Thank you. Your order has been declined due to security reasons.".$paytmTxnIdText;
+	        }
+	        fn_change_order_status($order_id,$pp_response['order_status']);
+	     	fn_finish_payment($order_id, $pp_response,array());
+	      	fn_order_placement_routines('route',$order_id);		
+			exit;				
+		}	
+	} 
+}else {
 	$merchant_id = $processor_data["processor_params"]['merchant_id'];
 	$industry_type = $processor_data["processor_params"]['industry_type'];
 	$website_name = $processor_data["processor_params"]['website_name'];
@@ -152,7 +146,6 @@ if (defined('PAYMENT_NOTIFICATION')) {
 	$paytm_shipping = fn_order_shipping_cost($order_info);//var_dump($order_info);exit;
 	$paytm_order_id = (($order_info['repaid']) ? ($order_id .'_'. $order_info['repaid']) : $order_id);
 	$date = date('Y-m-d H:i:s');
-	
 	$msg = fn_get_lang_var('text_cc_processor_connection');
 	$msg = str_replace('[processor]', 'paytm', $msg);
 	
@@ -162,32 +155,15 @@ if (defined('PAYMENT_NOTIFICATION')) {
 
 		}
 	}
-	$return_url =fn_url("payment_notification.notify?payment=paytm&order_id=$order_id", AREA, 'http') . '&';
-	$post_variables = Array(
-            "MID" =>  $merchant_id,
-            "ORDER_ID" => $paytm_order_id,
-            "CUST_ID" => $order_info['email'],
-            "TXN_AMOUNT" =>  $amount,
-            "CHANNEL_ID" => $channel_id,
-            "INDUSTRY_TYPE_ID" => $industry_type,
-	      		"WEBSITE" => $website_name,
-            );
-	$post_variables['CALLBACK_URL']=$return_url=trim($customCallBackUrl)!=''?$customCallBackUrl:$return_url;
-	if($addPromoInReq){
-		$post_variables['PROMO_CAMP_ID']=$userEnterCode;
-	}
+	$return_url =fn_url("payment_notification.notify?payment=paytm&order_id=$paytm_order_id", AREA, 'http') . '&';
 	$secret_key = $processor_data['processor_params']['secret_key'];
 	
-		
 	if($log == "yes")
 	{
 		error_log("All Params(Parameters which are posting to paytm) : " .$all);
 		error_log("paytm Secret Key : " .$secret_key);
 	}
 
-	$checksum = getChecksumFromArray($post_variables, $secret_key);//
-	//echo "<pre>";print_r($post_variables);print_r($checksum);var_dump($addPromoInReq);die;
-	
 	/****** js checkout code starts here*********/
 
 		$paytmParams = array();
@@ -207,35 +183,19 @@ if (defined('PAYMENT_NOTIFICATION')) {
 				"custId"    => $order_info['email'],
 			),
 		);
-		// $paytmParams["body"] = [];
-		// $paytmParams["body"]['requestType'] = "Payment";
-		// $paytmParams["body"]['mid'] = $merchant_id;
-		// $paytmParams["body"]['websiteName'] = $website_name;
-		// $paytmParams["body"]['orderId'] = $paytm_order_id;
-		// $paytmParams["body"]['callbackUrl'] = $returnUrl;
-		// $paytmParams["body"]['txnAmount'] = [];
-		// $paytmParams["body"]['txnAmount']['value'] = $amount;
-		// $paytmParams["body"]['txnAmount']['currency'] = "INR";
-		// $paytmParams["body"]['userInfo'] = [];
-		// $paytmParams["body"]['userInfo']['custId'] = $order_info['email'];
-		//echo "<pre>";print_r($paytmParams["body"]);die;
 		
 		$checksum = PaytmChecksum::generateSignature(json_encode($paytmParams["body"], JSON_UNESCAPED_SLASHES), $secret_key);
 
-		// $paytmParams["head"] = array(
-		//     "signature"    => $checksum
-		// );
 		$paytmParams["head"] = [];
 		$paytmParams["head"]['signature'] = $checksum;
 		
 		$post_data = json_encode($paytmParams, JSON_UNESCAPED_SLASHES);
 		
-		if(PaytmConstants::ENVIRONMENT == "stagging"){
+		if($processor_data['processor_params']['environment'] == "Staging"){
 			// /* for Staging */
 			$urlInitiateToken = PaytmConstants::STAGING_HOST.PaytmConstants::INITIATE_TRANSACTION_URL."?mid=".$merchant_id."&orderId=".$paytm_order_id."";
 			$host = PaytmConstants::STAGING_HOST;
-		}else{
-			
+		}else{			
 			/* for Production */
 			$urlInitiateToken = PaytmConstants::PRODUCTION_HOST.PaytmConstants::INITIATE_TRANSACTION_URL."?mid=".$merchant_id."&orderId=".$paytm_order_id."";
 			$host = PaytmConstants::PRODUCTION_HOST;
@@ -253,43 +213,20 @@ if (defined('PAYMENT_NOTIFICATION')) {
 			$data['orderId'] = '';
 			$data['message'] = "Something went wrong";
 		}
-		//echo "<pre>";print_r($data);die;
-		
 
 	/********* js checkout ends here ***********/
-	if($addPromoInReq){
-		echo <<<EOT
-		<html>
-		<body onLoad="document.paytm_form.submit();">
-		<form action="{$paytm_url}" method="post" name="paytm_form">
-		
-			<input type=hidden name="MID" value="{$merchant_id}">
-			<input type=hidden name="PROMO_CAMP_ID" value="{$userEnterCode}">
-			<input type=hidden name="ORDER_ID" value="$paytm_order_id">
-			<input type=hidden name="WEBSITE" value="{$website_name}">
-			<input type=hidden name="INDUSTRY_TYPE_ID" value="{$industry_type}">
-			<input type=hidden name="CHANNEL_ID" value="{$channel_id}">
-			<input type=hidden name="TXN_AMOUNT" value="{$amount}">
-			<input type=hidden name="CUST_ID"  value="{$order_info['email']}">
-		    <input type=hidden name="CALLBACK_URL" value="{$return_url}"> 
-			<input type=hidden name="CHECKSUMHASH" value="{$checksum}">
-		</form>
-		<div align=center>{$msg}</div>
-		</body>
-		</html>
-EOT;
-	}else{
-
 		echo'
 		<html>
 			<body>
+			<style>#paytm-pg-spinner{width:70px;text-align:center;z-index:999999;position:fixed;top:25%;left:50%}#paytm-pg-spinner>div{width:10px;height:10px;background-color:#012b71;border-radius:100%;display:inline-block;-webkit-animation:sk-bouncedelay 1.4s infinite ease-in-out both;animation:sk-bouncedelay 1.4s infinite ease-in-out both}#paytm-pg-spinner .bounce1{-webkit-animation-delay:-.64s;animation-delay:-.64s}#paytm-pg-spinner .bounce2{-webkit-animation-delay:-.48s;animation-delay:-.48s}#paytm-pg-spinner .bounce3{-webkit-animation-delay:-.32s;animation-delay:-.32s}#paytm-pg-spinner .bounce4{-webkit-animation-delay:-.16s;animation-delay:-.16s}#paytm-pg-spinner .bounce4,#paytm-pg-spinner .bounce5{background-color:#48baf5}@-webkit-keyframes sk-bouncedelay{0%,100%,80%{-webkit-transform:scale(0)}40%{-webkit-transform:scale(1)}}@keyframes sk-bouncedelay{0%,100%,80%{-webkit-transform:scale(0);transform:scale(0)}40%{-webkit-transform:scale(1);transform:scale(1)}}.paytm-overlay{width:100%;position:fixed;top:0;left:0;opacity:.3;height:100%;background:#000;z-index:9999}.paytm-woopg-loader p{font-size:10px!important}.paytm-woopg-loader a{font-size:15px!important}.refresh-payment{display:inline;margin-right:20px;width:100px;background:#00b9f5;padding:10px 15px;border-radius:5px;color:#fff;text-decoration:none}#paytm-checkoutjs{display:block!important}.paytm-action-btn{display:block;padding:25px}</style>
 			<script type="application/javascript" crossorigin="anonymous" src="'.$host.'/merchantpgpui/checkoutjs/merchants/'.$merchant_id.'.js"></script>
 				<script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+				<div id="paytm-pg-spinner" class="paytm-woopg-loader"><div class="bounce1"></div><div class="bounce2"></div><div class="bounce3"></div><div class="bounce4"></div><div class="bounce5"></div><p class="loading-paytm">Loading Paytm...</p></div><div class="paytm-overlay paytm-woopg-loader"></div><div class="paytm-action-btn"></div>
 				<script type="text/javascript">
 					
 					$( document ).ready(function() {
 						function invokeBlinkCheckoutPopup(){
-							var orderId = '.$paytm_order_id.';
+							var orderId = "'.$data['orderId'].'";
 							var txnToken = "'.$data['txnToken'].'";
 							var amount = '.round($amount).';
 						var config = {
@@ -301,6 +238,10 @@ EOT;
 				          "tokenType": "TXN_TOKEN",
 				          "amount": amount /* update amount */
 				         },
+				         "integration": {
+		                    "platform": "'.PRODUCT_NAME.'",
+		                    "version": "'.PRODUCT_VERSION.'|'.PaytmConstants::PLUGIN_VERSION.'"
+		                },
 				         "handler": {
 				            "notifyMerchant": function(eventName,data){
 				        if(eventName == "SESSION_EXPIRED"){
@@ -325,32 +266,10 @@ EOT;
 	    			}, 3000);
 	    			
 	    		});
-
 			   		
 		    	</script>
 			</body>
 		</html>';
-		//echo $paytm_url;die;
-// 		echo <<<EOT
-// 		<html>
-// 		<body onLoad="document.paytm_form.submit();">
-// 		<form action="{$paytm_url}" method="post" name="paytm_form">
-		
-// 			<input type=hidden name="MID" value="{$merchant_id}">
-// 			<input type=hidden name="ORDER_ID" value="$paytm_order_id">
-// 			<input type=hidden name="WEBSITE" value="{$website_name}">
-// 			<input type=hidden name="INDUSTRY_TYPE_ID" value="{$industry_type}">
-// 			<input type=hidden name="CHANNEL_ID" value="{$channel_id}">
-// 			<input type=hidden name="TXN_AMOUNT" value="{$amount}">
-// 			<input type=hidden name="CUST_ID"  value="{$order_info['email']}">
-// 		    <input type=hidden name="CALLBACK_URL" value="{$return_url}"> 
-// 			<input type=hidden name="CHECKSUMHASH" value="{$checksum}">
-// 		</form>
-// 		<div align=center>{$msg}</div>
-// 		</body>
-// 		</html>
-// EOT;
-	}
 
 	fn_flush();
 }
