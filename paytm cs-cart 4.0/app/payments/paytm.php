@@ -58,8 +58,9 @@ if (defined('PAYMENT_NOTIFICATION')) {
 		}
 		die;
 	}else{
-		$joint_order_id		= explode("-",$_POST['ORDERID']);
-		$order_id			= $joint_order_id[0];
+		// $joint_order_id		= explode("-",$_POST['ORDERID']);
+		// $order_id			= $joint_order_id[0];
+		$order_id = !empty($_POST['ORDERID'])? PaytmHelper::getOrderId($_POST['ORDERID']) : 0;
 		$res_code			= $_POST['RESPCODE'];
 		$res_desc			= $_POST['RESPMSG'];
 		$checksum_recv		= $_POST['CHECKSUMHASH'];
@@ -144,7 +145,9 @@ if (defined('PAYMENT_NOTIFICATION')) {
 	$paytm_total = fn_format_price($order_info['total']) ;
 	$amount = $paytm_total ;							// Should be in Rupees 
 	$paytm_shipping = fn_order_shipping_cost($order_info);//var_dump($order_info);exit;
-	$paytm_order_id = (($order_info['repaid']) ? ($order_id .'_'. $order_info['repaid']) : $order_id);
+	//$paytm_order_id = (($order_info['repaid']) ? ($order_id .'_'. $order_info['repaid']) : $order_id);
+	$paytm_order_id = PaytmHelper::getPaytmOrderId($order_id);
+	//$paytm_order_id = time();
 	$date = date('Y-m-d H:i:s');
 	$msg = fn_get_lang_var('text_cc_processor_connection');
 	$msg = str_replace('[processor]', 'paytm', $msg);
@@ -176,7 +179,7 @@ if (defined('PAYMENT_NOTIFICATION')) {
 			"orderId"       => $paytm_order_id,
 			"callbackUrl"   => $returnUrl,
 			"txnAmount"     => array(
-				"value"     => round($amount),
+				"value"     => $amount,
 				"currency"  => "INR",
 			),
 			"userInfo"      => array(
@@ -212,65 +215,61 @@ if (defined('PAYMENT_NOTIFICATION')) {
 			$data['txnToken'] = '';
 			$data['orderId'] = '';
 			$data['message'] = "Something went wrong";
+			fn_set_notification('W', __('important'), ('Something went wrong.Please contact administrator.'));
+			fn_redirect('checkout.checkout');
+			exit;		
+
 		}
 
 	/********* js checkout ends here ***********/
-		echo'
-		<html>
-			<body>
-			<style>#paytm-pg-spinner{width:70px;text-align:center;z-index:999999;position:fixed;top:25%;left:50%}#paytm-pg-spinner>div{width:10px;height:10px;background-color:#012b71;border-radius:100%;display:inline-block;-webkit-animation:sk-bouncedelay 1.4s infinite ease-in-out both;animation:sk-bouncedelay 1.4s infinite ease-in-out both}#paytm-pg-spinner .bounce1{-webkit-animation-delay:-.64s;animation-delay:-.64s}#paytm-pg-spinner .bounce2{-webkit-animation-delay:-.48s;animation-delay:-.48s}#paytm-pg-spinner .bounce3{-webkit-animation-delay:-.32s;animation-delay:-.32s}#paytm-pg-spinner .bounce4{-webkit-animation-delay:-.16s;animation-delay:-.16s}#paytm-pg-spinner .bounce4,#paytm-pg-spinner .bounce5{background-color:#48baf5}@-webkit-keyframes sk-bouncedelay{0%,100%,80%{-webkit-transform:scale(0)}40%{-webkit-transform:scale(1)}}@keyframes sk-bouncedelay{0%,100%,80%{-webkit-transform:scale(0);transform:scale(0)}40%{-webkit-transform:scale(1);transform:scale(1)}}.paytm-overlay{width:100%;position:fixed;top:0;left:0;opacity:.3;height:100%;background:#000;z-index:9999}.paytm-woopg-loader p{font-size:10px!important}.paytm-woopg-loader a{font-size:15px!important}.refresh-payment{display:inline;margin-right:20px;width:100px;background:#00b9f5;padding:10px 15px;border-radius:5px;color:#fff;text-decoration:none}#paytm-checkoutjs{display:block!important}.paytm-action-btn{display:block;padding:25px}</style>
-			<script type="application/javascript" crossorigin="anonymous" src="'.$host.'/merchantpgpui/checkoutjs/merchants/'.$merchant_id.'.js"></script>
-				<script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
-				<div id="paytm-pg-spinner" class="paytm-woopg-loader"><div class="bounce1"></div><div class="bounce2"></div><div class="bounce3"></div><div class="bounce4"></div><div class="bounce5"></div><p class="loading-paytm">Loading Paytm...</p></div><div class="paytm-overlay paytm-woopg-loader"></div><div class="paytm-action-btn"></div>
-				<script type="text/javascript">
-					
-					$( document ).ready(function() {
-						function invokeBlinkCheckoutPopup(){
-							var orderId = "'.$data['orderId'].'";
-							var txnToken = "'.$data['txnToken'].'";
-							var amount = '.round($amount).';
-						var config = {
-				         "root": "",
-				         "flow": "DEFAULT",
-				         "data": {
-				          "orderId": orderId /* update order id */,
-				          "token": txnToken /* update token value */,
-				          "tokenType": "TXN_TOKEN",
-				          "amount": amount /* update amount */
-				         },
-				         "integration": {
-		                    "platform": "'.PRODUCT_NAME.'",
-		                    "version": "'.PRODUCT_VERSION.'|'.PaytmConstants::PLUGIN_VERSION.'"
-		                },
-				         "handler": {
-				            "notifyMerchant": function(eventName,data){
-				        if(eventName == "SESSION_EXPIRED"){
-				          location.reload(); 
-				        }
-				            } 
-				          }
-				        };
-	      
-	        			if(window.Paytm && window.Paytm.CheckoutJS){
-	                		// initialze configuration using init method 
-	                		window.Paytm.CheckoutJS.init(config).then(function onSuccess() {
-	                   		// after successfully update configuration invoke checkoutjs
-	                   			window.Paytm.CheckoutJS.invoke();
-	                		}).catch(function onError(error){
-			                    console.log("error => ",error);
-			                });
-	       				} 
-	    			}
-	    			setTimeout(function(){ 
-	    				invokeBlinkCheckoutPopup(); 
-	    			}, 3000);
-	    			
-	    		});
-			   		
-		    	</script>
-			</body>
-		</html>';
 
+	$wait_msg='<style>#paytm-pg-spinner{width:70px;text-align:center;z-index:999999;position:fixed;top:25%;left:50%}#paytm-pg-spinner>div{width:10px;height:10px;background-color:#012b71;border-radius:100%;display:inline-block;-webkit-animation:sk-bouncedelay 1.4s infinite ease-in-out both;animation:sk-bouncedelay 1.4s infinite ease-in-out both}#paytm-pg-spinner .bounce1{-webkit-animation-delay:-.64s;animation-delay:-.64s}#paytm-pg-spinner .bounce2{-webkit-animation-delay:-.48s;animation-delay:-.48s}#paytm-pg-spinner .bounce3{-webkit-animation-delay:-.32s;animation-delay:-.32s}#paytm-pg-spinner .bounce4{-webkit-animation-delay:-.16s;animation-delay:-.16s}#paytm-pg-spinner .bounce4,#paytm-pg-spinner .bounce5{background-color:#48baf5}@-webkit-keyframes sk-bouncedelay{0%,100%,80%{-webkit-transform:scale(0)}40%{-webkit-transform:scale(1)}}@keyframes sk-bouncedelay{0%,100%,80%{-webkit-transform:scale(0);transform:scale(0)}40%{-webkit-transform:scale(1);transform:scale(1)}}.paytm-overlay{width:100%;position:fixed;top:0;left:0;opacity:.3;height:100%;background:#000;z-index:9999}.paytm-woopg-loader p{font-size:10px!important}.paytm-woopg-loader a{font-size:15px!important}.refresh-payment{display:inline;margin-right:20px;width:100px;background:#00b9f5;padding:10px 15px;border-radius:5px;color:#fff;text-decoration:none}#paytm-checkoutjs{display:block!important}.paytm-action-btn{display:block;padding:25px}</style><script type="application/javascript" crossorigin="anonymous" src="'.$host.'/merchantpgpui/checkoutjs/merchants/'.$merchant_id.'.js" onload="invokeBlinkCheckoutPopup();"></script><div id="paytm-pg-spinner" class="paytm-woopg-loader"><div class="bounce1"></div><div class="bounce2"></div><div class="bounce3"></div><div class="bounce4"></div><div class="bounce5"></div><p class="loading-paytm">Loading Paytm...</p></div><div class="paytm-overlay paytm-woopg-loader"></div><div class="paytm-action-btn">	
+	</div>';
+			
+			echo '<script type="text/javascript">
+			function invokeBlinkCheckoutPopup(){
+				console.log("method called");
+				var config = {
+					"root": "",
+					"flow": "DEFAULT",
+					"data": {
+					  "orderId": "'.$data['orderId'].'", 
+					  "token": "'.$data['txnToken'].'", 
+					  "tokenType": "TXN_TOKEN",
+					  "amount": "'.$amount.'"
+					},
+				"integration": {
+		            "platform": "'.PRODUCT_NAME.'",
+		            "version": "'.PRODUCT_VERSION.'|'.PaytmConstants::PLUGIN_VERSION.'"
+		        },	
+					"handler": {
+					  "notifyMerchant": function(eventName,data){
+						console.log("notifyMerchant handler function called");
+						if(eventName=="APP_CLOSED")
+						{
+							var url = window.location.href;
+							var res = url.replace("place_order", "checkout");
+							window.location = res;
+
+						}
+					  } 
+					}
+				  };
+			
+				  if(window.Paytm && window.Paytm.CheckoutJS){
+					  window.Paytm.CheckoutJS.onLoad(function excecuteAfterCompleteLoad() {
+						  window.Paytm.CheckoutJS.init(config).then(function onSuccess() {
+							  window.Paytm.CheckoutJS.invoke();
+						  }).catch(function onError(error){
+							  console.log("error => ",error);
+						  });
+					  });
+				  } 
+			}
+			jQuery(document).ready(function(){ jQuery(".re-invoke").on("click",function(){ 
+				window.Paytm.CheckoutJS.invoke(); return false; }); });
+			</script>'.$wait_msg.'
+			';
 	fn_flush();
 }
 exit;
