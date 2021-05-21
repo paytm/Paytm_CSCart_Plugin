@@ -238,10 +238,10 @@ if (defined('PAYMENT_NOTIFICATION')) {
 					  "tokenType": "TXN_TOKEN",
 					  "amount": "'.$amount.'"
 					},
-				"integration": {
-		            "platform": "'.PRODUCT_NAME.'",
-		            "version": "'.PRODUCT_VERSION.'|'.PaytmConstants::PLUGIN_VERSION.'"
-		        },	
+				        "integration": {
+		                               "platform": "CsCart",
+		                               "version": "'.PRODUCT_VERSION.'|'.PaytmConstants::PLUGIN_VERSION.'"
+		                        },	
 					"handler": {
 					  "notifyMerchant": function(eventName,data){
 						console.log("notifyMerchant handler function called");
