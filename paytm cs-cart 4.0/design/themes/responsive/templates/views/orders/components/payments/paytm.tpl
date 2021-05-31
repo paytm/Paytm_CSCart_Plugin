@@ -7,9 +7,3 @@
     {assign var="id_suffix" value=""}
 {/if}
 
-<script type="application/javascript" crossorigin="anonymous" src="{{ srcUrl }}" onload="alert('Script loaded!'); loaded=true;"></script>
-<div class="buttons">
-	<div class="pull-right">
-	  <input type="button" value="{{ button_confirm }}" id="button-confirm" class="btn btn-primary" />
-	</div>
-  </div>
