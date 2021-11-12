@@ -6,15 +6,18 @@
   5. REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_industry_type','Industry Type Id');
   6. REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_website_name','Website');
   7. REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_channel_id','Channel Id');
-  8. REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_version_txt','Paytm plugin updated on 01 March 2021.');
+  8. REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_version_txt','Paytm plugin updated on 10 November 2021.');
   9. REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_custom_callbackurl','Custom Callback URL (if you want)');
   10. REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_log_params','Log');
   11. REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_yes','Yes');
   12. REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_no','No');
-  12. REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('en','paytm_environment','environment');
-  13. REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('en','paytm_staging','Staging');
-  14. REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('en','paytm_production','Production');
-  
+  12. REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_environment','Environment');
+  13. REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_staging','Staging');
+  14. REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_production','Production');
+  15. REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_bank_offer','Enable Bank Offers');
+  16. REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_emi_subvention','Enable EMI Subvention');
+  17. REPLACE INTO cscart_language_values (`lang_code`,`name`,`value`) VALUES ('EN','paytm_dc_emi','Enable DC EMI');
+    
 #### Installation/Configurations
   1. Upload the contents of the plugin to your CS Cart Installation directory (content of app folder goes in app folder, content of design folder in design folder).
   2. Log into CS-Cart as administrator. Navigate to Administration / Payment Methods.

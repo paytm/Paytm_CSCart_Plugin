@@ -45,8 +45,36 @@
 </div>
 
 <div class="form-field">
+	<label for="emi_subvention">{__("paytm_emi_subvention")}:</label>
+	<select name="payment_data[processor_params][emi_subvention]" id="emi_subvention">
+		<option value="no" {if $processor_params.emi_subvention == "no"}selected="selected"{/if}>{__("paytm_no")}</option>
+		<option value="yes" {if $processor_params.emi_subvention == "yes"}selected="selected"{/if}>{__("paytm_yes")}</option>
+		
+	</select>
+</div>
+
+<div class="form-field">
+	<label for="bank_offer">{__("paytm_bank_offer")}:</label>
+	<select name="payment_data[processor_params][bank_offer]" id="bank_offer">
+		<option value="no" {if $processor_params.bank_offer == "no"}selected="selected"{/if}>{__("paytm_no")}</option>
+		<option value="yes" {if $processor_params.bank_offer == "yes"}selected="selected"{/if}>{__("paytm_yes")}</option>
+		
+	</select>
+</div>
+
+<div class="form-field">
+	<label for="dc_emi">{__("paytm_dc_emi")}:</label>
+	<select name="payment_data[processor_params][dc_emi]" id="dc_emi">
+		<option value="no" {if $processor_params.dc_emi == "no"}selected="selected"{/if}>{__("paytm_no")}</option>
+		<option value="yes" {if $processor_params.dc_emi == "yes"}selected="selected"{/if}>{__("paytm_yes")}</option>
+		
+	</select>
+</div>
+
+<div class="form-field">
 	<label for="log_params"></label>
 </div>
 <div class="form-field">
 	<label for="log_params">{__("paytm_version_txt")}</label>
 </div>
+

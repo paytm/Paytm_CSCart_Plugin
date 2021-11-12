@@ -1,6 +1,6 @@
  <?php
 //
-// Paytm_v2.1 - CSCart
+// Paytm_v2.2 - CSCart
 //
 //ini_set('display_errors','On');
 //error_reporting(E_ALL);
@@ -186,8 +186,22 @@ if (defined('PAYMENT_NOTIFICATION')) {
 				"custId"    => $order_info['email'],
 			),
 		);
-		
-		$checksum = PaytmChecksum::generateSignature(json_encode($paytmParams["body"], JSON_UNESCAPED_SLASHES), $secret_key);
+		// for bank offers
+        if($processor_data["processor_params"]['bank_offer'] == "yes" ){
+            $paytmParams["body"]["simplifiedPaymentOffers"]["applyAvailablePromo"]= "true";
+        }
+        // for emi subvention
+        if($processor_data["processor_params"]['emi_subvention'] == "yes"){
+            $paytmParams["body"]["simplifiedSubvention"]["customerId"]= $order_info['email'];
+            $paytmParams["body"]["simplifiedSubvention"]["subventionAmount"]= $amount;
+            $paytmParams["body"]["simplifiedSubvention"]["selectPlanOnCashierPage"]= "true";
+            //$paytmParams["body"]["simplifiedSubvention"]["offerDetails"]["offerId"]= 1;
+        }
+        // for dc emi
+        if($processor_data["processor_params"]['dc_emi'] == "yes"){
+            $paytmParams["body"]["userInfo"]["mobile"]= $order_info['phone'];
+        }
+        $checksum = PaytmChecksum::generateSignature(json_encode($paytmParams["body"], JSON_UNESCAPED_SLASHES), $secret_key);
 
 		$paytmParams["head"] = [];
 		$paytmParams["head"]['signature'] = $checksum;
