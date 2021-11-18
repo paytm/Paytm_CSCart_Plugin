@@ -27,4 +27,8 @@
   6. Enter your Paytm Details.
   7. Click 'Save'
 
+#### Note
+  1. This plugin supports Debit Card EMI, send us the user mobile number in order to check the user’s Debit Card EMI eligibility and show the applicable banks name.
+  2. This plugin supports EMI Subvention and Bank offers, please reach out to us through Contact Us or your KAM to enable EMI Subvention and Bank Offers for your MID.
+  
 #### In case of any query, please contact to Paytm.
