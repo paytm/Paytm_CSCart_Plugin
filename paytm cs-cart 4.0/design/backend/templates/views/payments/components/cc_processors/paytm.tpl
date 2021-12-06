@@ -1,21 +1,25 @@
 <div class="form-field">
 	<label for="merchant_i">{__("paytm_merchant_id")}:</label>
 	<input type="text" name="payment_data[processor_params][merchant_id]" id="merchant_id" value="{$processor_params.merchant_id}" class="input-text" />
+	<div style="font-weight: bold;">Based on the selected Environment Mode, copy the relevant Merchant ID for test or production environment available on <a href="https://dashboard.paytm.com/next/apikeys" target="_blank">Paytm dashboard</a>.</div>
 </div>
 
 <div class="form-field">
 	<label for="secret_key">{__("paytm_secret_key")}:</label>
 	<input type="text" name="payment_data[processor_params][secret_key]" id="secret_key" value="{$processor_params.secret_key}" class="input-text" />
+	<div style="font-weight: bold;">Based on the selected Environment Mode, copy the Merchant Key for test or production environment available on <a href="https://dashboard.paytm.com/next/apikeys" target="_blank">Paytm dashboard</a>.</div>
 </div>
 
 <div class="form-field">
 	<label for="industry_type">{__("paytm_industry_type")}:</label>
 	<input type="text" name="payment_data[processor_params][industry_type]" id="industry_type" value="{$processor_params.industry_type}" class="input-text" />
+	<div style="font-weight: bold;">Login to <a href="https://dashboard.paytm.com/next/apikeys" target="_blank">Paytm dashboard</a> & copy paste the industry type available there.</div>
 </div>
 
 <div class="form-field">
 	<label for="website_name">{__("paytm_website_name")}:</label>
 	<input type="text" name="payment_data[processor_params][website_name]" id="website_name" value="{$processor_params.website_name}" class="input-text" />
+	<div style="font-weight: bold;">Enter "WEBSTAGING" for test/integration environment & "DEFAULT" for production environment.</div>
 </div>
 
 <div class="form-field">
@@ -34,6 +38,7 @@
 		<option value="Staging" {if $processor_params.environment == "Staging"}selected="selected"{/if}>{__("paytm_staging")}</option>
 		<option value="Production" {if $processor_params.environment == "Production"}selected="selected"{/if}>{__("paytm_production")}</option>
 	</select>
+	<div style="font-weight: bold;">Select "Staging" for test/integration environment & "Production" once you move to production environment.</div>
 </div>
 
 <div class="form-field">
@@ -51,6 +56,7 @@
 		<option value="yes" {if $processor_params.emi_subvention == "yes"}selected="selected"{/if}>{__("paytm_yes")}</option>
 		
 	</select>
+	<div style="font-weight: bold;">Get your EMI Subvention plans configured at Paytm & then Select "Yes" to offer EMI Subvention to your customers.</div>
 </div>
 
 <div class="form-field">
@@ -60,6 +66,7 @@
 		<option value="yes" {if $processor_params.bank_offer == "yes"}selected="selected"{/if}>{__("paytm_yes")}</option>
 		
 	</select>
+	<div style="font-weight: bold;">Get your Bank Offer plans configured at Paytm & then Select "Yes" to provide Bank Offer to your customers.</div>
 </div>
 
 <div class="form-field">
@@ -69,6 +76,7 @@
 		<option value="yes" {if $processor_params.dc_emi == "yes"}selected="selected"{/if}>{__("paytm_yes")}</option>
 		
 	</select>
+	<div style="font-weight: bold;">Get DC EMI enabled for your MID and then select "Yes" to offer DC EMI to your customer. Customer mobile number is mandatory for DC EMI.</div>
 </div>
 
 <div class="form-field">
@@ -77,4 +85,3 @@
 <div class="form-field">
 	<label for="log_params">{__("paytm_version_txt")}</label>
 </div>
-
