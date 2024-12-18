@@ -24,7 +24,7 @@ if (defined('PAYMENT_NOTIFICATION')) {
 		$testing_urls = array(
 			fn_url(''),
 			"https://www.gstatic.com/generate_204",
-			"https://securegw.paytm.in/merchant-status/getTxnStatus",
+			"https://secure.paytmpayments.com/merchant-status/getTxnStatus",
 		);
 		foreach($testing_urls as $key=>$url){
 			$debug[$key]["info"][] = "Connecting to <b>" . $url . "</b> using cURL";
@@ -141,7 +141,7 @@ if (defined('PAYMENT_NOTIFICATION')) {
 	$customCallBackUrl = $processor_data["processor_params"]['paytm_custom_callbackurl'];
 	$log = $processor_data['processor_params']['log_params'];
 	//Order Total
-	$paytm_url = (!empty($transaction_url))?$transaction_url:"https://securegw-stage.paytm.in/theia/processTransaction";	
+	$paytm_url = (!empty($transaction_url))?$transaction_url:"https://securestage.paytmpayments.com/theia/processTransaction";	
 	$paytm_total = fn_format_price($order_info['total']) ;
 	$amount = $paytm_total ;							// Should be in Rupees 
 	$paytm_shipping = fn_order_shipping_cost($order_info);//var_dump($order_info);exit;

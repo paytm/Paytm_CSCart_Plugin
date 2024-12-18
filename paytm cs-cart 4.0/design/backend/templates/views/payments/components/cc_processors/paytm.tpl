@@ -1,19 +1,19 @@
 <div class="form-field">
 	<label for="merchant_i">{__("paytm_merchant_id")}:</label>
 	<input type="text" name="payment_data[processor_params][merchant_id]" id="merchant_id" value="{$processor_params.merchant_id}" class="input-text" />
-	<div style="font-weight: bold;">Based on the selected Environment Mode, copy the relevant Merchant ID for test or production environment available on <a href="https://dashboard.paytm.com/next/apikeys" target="_blank">Paytm dashboard</a>.</div>
+	<div style="font-weight: bold;">Based on the selected Environment Mode, copy the relevant Merchant ID for test or production environment available on <a href="https://dashboard.paytmpayments.com/next/apikeys" target="_blank">Paytm dashboard</a>.</div>
 </div>
 
 <div class="form-field">
 	<label for="secret_key">{__("paytm_secret_key")}:</label>
 	<input type="text" name="payment_data[processor_params][secret_key]" id="secret_key" value="{$processor_params.secret_key}" class="input-text" />
-	<div style="font-weight: bold;">Based on the selected Environment Mode, copy the Merchant Key for test or production environment available on <a href="https://dashboard.paytm.com/next/apikeys" target="_blank">Paytm dashboard</a>.</div>
+	<div style="font-weight: bold;">Based on the selected Environment Mode, copy the Merchant Key for test or production environment available on <a href="https://dashboard.paytmpayments.com/next/apikeys" target="_blank">Paytm dashboard</a>.</div>
 </div>
 
 <div class="form-field">
 	<label for="industry_type">{__("paytm_industry_type")}:</label>
 	<input type="text" name="payment_data[processor_params][industry_type]" id="industry_type" value="{$processor_params.industry_type}" class="input-text" />
-	<div style="font-weight: bold;">Login to <a href="https://dashboard.paytm.com/next/apikeys" target="_blank">Paytm dashboard</a> & copy paste the industry type available there.</div>
+	<div style="font-weight: bold;">Login to <a href="https://dashboard.paytmpayments.com/next/apikeys" target="_blank">Paytm dashboard</a> & copy paste the industry type available there.</div>
 </div>
 
 <div class="form-field">
